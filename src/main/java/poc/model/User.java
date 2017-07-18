@@ -21,13 +21,7 @@ public class User {
   @Id
   @GenericGenerator(
       name = "assigned-sequence",
-      strategy = "poc.generator.StringSequenceGenerator",
-      parameters = {
-          @org.hibernate.annotations.Parameter(
-              name = "sequence_name", value = "hibernate_sequence"),
-          @org.hibernate.annotations.Parameter(
-              name = "sequence_prefix", value = "CTC_"),
-      }
+      strategy = "poc.generator.PrefixedIdGenerator"
   )
   @GeneratedValue(
       generator = "assigned-sequence")
