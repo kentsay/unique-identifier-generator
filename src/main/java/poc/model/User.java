@@ -2,9 +2,9 @@ package poc.model;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "user")
@@ -19,7 +19,18 @@ public class User {
   }
 
   @Id
-  @GeneratedValue(strategy= GenerationType.AUTO)
+  @GenericGenerator(
+      name = "assigned-sequence",
+      strategy = "poc.generator.StringSequenceGenerator",
+      parameters = {
+          @org.hibernate.annotations.Parameter(
+              name = "sequence_name", value = "hibernate_sequence"),
+          @org.hibernate.annotations.Parameter(
+              name = "sequence_prefix", value = "CTC_"),
+      }
+  )
+  @GeneratedValue(
+      generator = "assigned-sequence")
   public Long getId() {
     return id;
   }
