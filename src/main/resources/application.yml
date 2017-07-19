@@ -13,5 +13,5 @@ db:
     hibernate:
       dialect: org.hibernate.dialect.MySQL5InnoDBDialect
       hbm2ddlAuto : create
-      showSql: true
+      showSql: false
       formatSql: true
