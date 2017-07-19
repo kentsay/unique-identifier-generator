@@ -6,7 +6,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import poc.model.BaselineUser;
 import poc.model.PrefixedUser;
+import poc.repository.BaselineUserRepo;
 import poc.repository.PrefixedUserRepo;
 
 @SpringBootApplication
@@ -19,9 +21,26 @@ public class Application {
   }
 
   @Bean
-  public CommandLineRunner demo(PrefixedUserRepo repo) {
+  public CommandLineRunner demo(BaselineUserRepo baselineUserRepo, PrefixedUserRepo prefixedUserRepo) {
     return (args) -> {
-      LongStream.rangeClosed(1L, 1000000L).forEach(c -> repo.save(new PrefixedUser(Long.toString(c))));
+      if (args.length < 1 || args.length > 2) {
+        System.out.println("Usage: java -jar poc-id-generator-<version>.jar baseline|prefixed [number of iterations]");
+        return;
+      }
+
+      long maxIterations = 1000L;
+      if (args.length == 2) {
+        maxIterations = Long.parseLong(args[1]);
+      }
+
+      switch (args[0]) {
+        case "baseline":
+          LongStream.rangeClosed(1L, maxIterations).forEach(c -> baselineUserRepo.save(new BaselineUser(Long.toString(c))));
+          break;
+        case "prefixed":
+          LongStream.rangeClosed(1L, maxIterations).forEach(c -> prefixedUserRepo.save(new PrefixedUser(Long.toString(c))));
+          break;
+      }
     };
   }
 
