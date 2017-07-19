@@ -7,14 +7,16 @@ import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-@Table(name = "user")
-public class User {
+@Table(name = "prefixed_user")
+public class PrefixedUser {
+
   private Long id;
   private String name;
 
-  public User() { }
+  public PrefixedUser() {
+  }
 
-  public User(String name) {
+  public PrefixedUser(String name) {
     this.name = name;
   }
 

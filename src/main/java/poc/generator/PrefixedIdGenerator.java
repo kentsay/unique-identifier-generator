@@ -34,9 +34,9 @@ public class PrefixedIdGenerator implements IdentifierGenerator {
         statement = connection.createStatement();
         statement.execute(
             "CREATE TABLE `" + DEFAULT_SEQUENCE_NAME + "` ("
-            + "  `id` bigint(20) NOT NULL AUTO_INCREMENT,"
-            + "  PRIMARY KEY (`id`)"
-            + ") ENGINE=InnoDB");
+                + "  `id` bigint(20) NOT NULL AUTO_INCREMENT,"
+                + "  PRIMARY KEY (`id`)"
+                + ") ENGINE=InnoDB");
         System.out.println("Sequence table created successfully");
         statement.executeUpdate(insertStatement, Statement.RETURN_GENERATED_KEYS);
         resultSet = statement.getGeneratedKeys();
