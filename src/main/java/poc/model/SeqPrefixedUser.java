@@ -28,9 +28,13 @@ public class SeqPrefixedUser {
               value = "abc"
           ),
           @org.hibernate.annotations.Parameter(
-              name = "prefix",
-              value = "50000000000"
+              name = "optimizer",
+              value = "pooled"
           ),
+          @org.hibernate.annotations.Parameter(
+              name = "increment_size",
+              value = "50"
+          )
       }
   )
   @GeneratedValue(

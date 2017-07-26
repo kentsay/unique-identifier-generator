@@ -13,12 +13,12 @@ import java.util.Properties;
 
 public class SeqPrefixedIdGenerator extends SequenceStyleGenerator {
 
-  private final String PREFIX = "prefix";
-  private String prefix_value;
+//  private final String PREFIX = "prefix";
+  private Long prefix_value = 473000000000L;
 
   @Override
   public void configure(Type type, Properties params, ServiceRegistry serviceRegistry) {
-    prefix_value = params.getProperty(PREFIX);
+//    prefix_value = params.getProperty(PREFIX);
     super.configure(type, params, serviceRegistry);
   }
 
@@ -33,7 +33,6 @@ public class SeqPrefixedIdGenerator extends SequenceStyleGenerator {
       }
     }
 
-    long prefix = Long.parseLong(prefix_value);
-    return Long.parseLong(String.valueOf(prefix + (Long) super.generate(session, obj)));
+    return Long.parseLong(String.valueOf(prefix_value + (Long) super.generate(session, obj)));
   }
 }
