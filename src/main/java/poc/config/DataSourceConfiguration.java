@@ -1,5 +1,6 @@
 package poc.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +31,16 @@ public class DataSourceConfiguration {
   @Primary
   @Bean(name = "dataSource", destroyMethod = "close")
   @Qualifier("dataSource")
-  @ConfigurationProperties(prefix = "db.master")
+
   public DataSource dataSource() {
-    return DataSourceBuilder.create().build();
+    HikariDataSource hikariDataSource = new HikariDataSource();
+    hikariDataSource.setJdbcUrl("jdbc:mysql://localhost:3306/poc_id_generator?characterEncoding=UTF-8&amp;useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false");
+    hikariDataSource.setUsername("mysql");
+    hikariDataSource.setPassword("mysql");
+    hikariDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+    hikariDataSource.setMaximumPoolSize(500);
+    hikariDataSource.setIdleTimeout(10000);
+    return hikariDataSource;
   }
 
   @Primary

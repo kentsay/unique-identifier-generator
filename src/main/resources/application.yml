@@ -8,10 +8,11 @@ db:
     password : mysql
     hikari:
       idle-timeout: 10000
-      pool-size : 10
+      maximum-pool-size: 500
   jpa:
     hibernate:
       dialect: org.hibernate.dialect.MySQL5InnoDBDialect
       hbm2ddlAuto : create
       showSql: false
       formatSql: true
+
