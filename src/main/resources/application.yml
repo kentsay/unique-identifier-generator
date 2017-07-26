@@ -3,7 +3,7 @@ db:
   master:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
-    url : jdbc:mysql://localhost:3306/poc_id_generator?characterEncoding=UTF-8&amp;useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url : jdbc:mysql://localhost:3306/poc_id_generator?characterEncoding=UTF-8&amp;useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false
     username : mysql
     password : mysql
     hikari:
@@ -13,5 +13,5 @@ db:
     hibernate:
       dialect: org.hibernate.dialect.MySQL5InnoDBDialect
       hbm2ddlAuto : create
-      showSql: true
+      showSql: false
       formatSql: true
