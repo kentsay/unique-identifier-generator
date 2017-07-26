@@ -1,5 +1,8 @@
 package poc;
 
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.LongStream;
 import org.springframework.boot.Banner;
 import org.springframework.boot.CommandLineRunner;
@@ -14,6 +17,11 @@ import poc.repository.PrefixedUserRepo;
 @SpringBootApplication
 public class Application {
 
+  private ExecutorService pool;
+  private CyclicBarrier barrier;
+  private int numThreads;
+  private long numIterations;
+
   public static void main(String[] args) {
     SpringApplication app = new SpringApplication(Application.class);
     app.setBannerMode(Banner.Mode.OFF);
@@ -21,27 +29,85 @@ public class Application {
   }
 
   @Bean
-  public CommandLineRunner demo(BaselineUserRepo baselineUserRepo, PrefixedUserRepo prefixedUserRepo) {
+  public CommandLineRunner demo(BaselineUserRepo baselineUserRepo,
+      PrefixedUserRepo prefixedUserRepo) {
     return (args) -> {
-      if (args.length < 1 || args.length > 2) {
-        System.out.println("Usage: java -jar poc-id-generator-<version>.jar baseline|prefixed [number of iterations]");
+      if (args.length < 1 || args.length > 3) {
+        System.out.println(
+            "Usage: java -jar poc-id-generator-<version>.jar baseline|prefixed [number of concurrent threads] [number of iterations]");
         return;
       }
 
-      long maxIterations = 1000L;
-      if (args.length == 2) {
-        maxIterations = Long.parseLong(args[1]);
+      numIterations = 1000L;
+      numThreads = 50;
+      if (args.length == 3) {
+        numIterations = Long.parseLong(args[2]);
+        numThreads = Integer.parseInt(args[1]);
+      } else if (args.length == 2) {
+        numThreads = Integer.parseInt(args[1]);
       }
+      String strategy = args[0];
 
-      switch (args[0]) {
+      this.pool = Executors.newCachedThreadPool();
+      this.barrier = new CyclicBarrier(numThreads + 1);
+
+      switch (strategy) {
         case "baseline":
-          LongStream.rangeClosed(1L, maxIterations).forEach(c -> baselineUserRepo.save(new BaselineUser(Long.toString(c))));
+          for (int i = 0; i < numThreads; i++) {
+            pool.execute(new BaselineStrategy(baselineUserRepo));
+          }
           break;
         case "prefixed":
-          LongStream.rangeClosed(1L, maxIterations).forEach(c -> prefixedUserRepo.save(new PrefixedUser(Long.toString(c))));
+          for (int i = 0; i < numThreads; i++) {
+            pool.execute(new PrefixedStrategy(prefixedUserRepo));
+          }
           break;
       }
+      barrier.await();
+      pool.shutdown();
     };
+  }
+
+  class BaselineStrategy implements Runnable {
+
+    BaselineUserRepo repo;
+
+    BaselineStrategy(BaselineUserRepo theRepo) {
+      repo = theRepo;
+    }
+
+    @Override
+    public void run() {
+      try {
+        barrier.await();
+        LongStream
+            .rangeClosed(1L, numIterations)
+            .forEach(c -> repo.save(new BaselineUser(Long.toString(c))));
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  class PrefixedStrategy implements Runnable {
+
+    PrefixedUserRepo repo;
+
+    PrefixedStrategy(PrefixedUserRepo theRepo) {
+      repo = theRepo;
+    }
+
+    @Override
+    public void run() {
+      try {
+        barrier.await();
+        LongStream
+            .rangeClosed(1L, numIterations)
+            .forEach(c -> repo.save(new PrefixedUser(Long.toString(c))));
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
 }
