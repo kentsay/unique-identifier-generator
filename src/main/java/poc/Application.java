@@ -32,7 +32,8 @@ public class Application {
 
   @Bean
   public CommandLineRunner demo(BaselineUserRepo baselineUserRepo,
-      PrefixedUserRepo prefixedUserRepo) {
+      PrefixedUserRepo prefixedUserRepo,
+      SeqPrefixedUserRepo seqPrefixedUserRepo) {
     return (args) -> {
       if (args.length < 1 || args.length > 3) {
         System.out.println(
@@ -50,7 +51,7 @@ public class Application {
       }
       String strategy = args[0];
 
-      this.pool = Executors.newCachedThreadPool();
+      this.pool = Executors.newFixedThreadPool(numThreads);
       this.barrier = new CyclicBarrier(numThreads + 1);
 
       switch (strategy) {
@@ -61,12 +62,12 @@ public class Application {
           break;
         case "custPrefixed":
           for (int i = 0; i < numThreads; i++) {
-            pool.execute(new PrefixedStrategy(prefixedUserRepo));
+            pool.execute(new CustPrefixedStrategy(prefixedUserRepo));
           }
           break;
         case "seqPrefixed":
           for (int i = 0; i < numThreads; i++) {
-            pool.execute(new PrefixedStrategy(prefixedUserRepo));
+            pool.execute(new SeqPrefixedStrategy(seqPrefixedUserRepo));
           }
           break;
       }
@@ -96,11 +97,11 @@ public class Application {
     }
   }
 
-  class PrefixedStrategy implements Runnable {
+  class CustPrefixedStrategy implements Runnable {
 
     PrefixedUserRepo repo;
 
-    PrefixedStrategy(PrefixedUserRepo theRepo) {
+    CustPrefixedStrategy(PrefixedUserRepo theRepo) {
       repo = theRepo;
     }
 
@@ -117,4 +118,24 @@ public class Application {
     }
   }
 
+  class SeqPrefixedStrategy implements Runnable {
+
+    SeqPrefixedUserRepo repo;
+
+    SeqPrefixedStrategy(SeqPrefixedUserRepo repo) {
+      this.repo = repo;
+    }
+
+    @Override
+    public void run() {
+      try {
+        barrier.await();
+        LongStream
+            .rangeClosed(1L, numIterations)
+            .forEach(c -> repo.save(new SeqPrefixedUser(Long.toString(c))));
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
 }
