@@ -8,8 +8,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import poc.model.BaselineUser;
 import poc.model.PrefixedUser;
+import poc.model.SeqPrefixedUser;
 import poc.repository.BaselineUserRepo;
 import poc.repository.PrefixedUserRepo;
+import poc.repository.SeqPrefixedUserRepo;
 
 @SpringBootApplication
 public class Application {
@@ -21,10 +23,12 @@ public class Application {
   }
 
   @Bean
-  public CommandLineRunner demo(BaselineUserRepo baselineUserRepo, PrefixedUserRepo prefixedUserRepo) {
+  public CommandLineRunner demo(BaselineUserRepo baselineUserRepo,
+      PrefixedUserRepo prefixedUserRepo, SeqPrefixedUserRepo seqPrefixedUserRepo) {
     return (args) -> {
       if (args.length < 1 || args.length > 2) {
-        System.out.println("Usage: java -jar poc-id-generator-<version>.jar baseline|prefixed [number of iterations]");
+        System.out.println(
+            "Usage: java -jar poc-id-generator-<version>.jar baseline|prefixed|table [number of iterations]");
         return;
       }
 
@@ -35,10 +39,16 @@ public class Application {
 
       switch (args[0]) {
         case "baseline":
-          LongStream.rangeClosed(1L, maxIterations).forEach(c -> baselineUserRepo.save(new BaselineUser(Long.toString(c))));
+          LongStream.rangeClosed(1L, maxIterations)
+              .forEach(c -> baselineUserRepo.save(new BaselineUser(Long.toString(c))));
           break;
         case "prefixed":
-          LongStream.rangeClosed(1L, maxIterations).forEach(c -> prefixedUserRepo.save(new PrefixedUser(Long.toString(c))));
+          LongStream.rangeClosed(1L, maxIterations)
+              .forEach(c -> prefixedUserRepo.save(new PrefixedUser(Long.toString(c))));
+          break;
+        case "table":
+          LongStream.rangeClosed(1L, maxIterations)
+              .forEach(c -> seqPrefixedUserRepo.save(new SeqPrefixedUser(Long.toString(c))));
           break;
       }
     };
