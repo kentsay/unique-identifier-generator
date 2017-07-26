@@ -11,8 +11,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import poc.model.BaselineUser;
 import poc.model.PrefixedUser;
+import poc.model.SeqPrefixedUser;
 import poc.repository.BaselineUserRepo;
 import poc.repository.PrefixedUserRepo;
+import poc.repository.SeqPrefixedUserRepo;
 
 @SpringBootApplication
 public class Application {
@@ -34,7 +36,7 @@ public class Application {
     return (args) -> {
       if (args.length < 1 || args.length > 3) {
         System.out.println(
-            "Usage: java -jar poc-id-generator-<version>.jar baseline|prefixed [number of concurrent threads] [number of iterations]");
+            "Usage: java -jar poc-id-generator-<version>.jar baseline|custPrefixed|seqPrefixed [number of concurrent threads] [number of iterations]");
         return;
       }
 
@@ -57,7 +59,12 @@ public class Application {
             pool.execute(new BaselineStrategy(baselineUserRepo));
           }
           break;
-        case "prefixed":
+        case "custPrefixed":
+          for (int i = 0; i < numThreads; i++) {
+            pool.execute(new PrefixedStrategy(prefixedUserRepo));
+          }
+          break;
+        case "seqPrefixed":
           for (int i = 0; i < numThreads; i++) {
             pool.execute(new PrefixedStrategy(prefixedUserRepo));
           }
