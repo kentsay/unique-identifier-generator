@@ -1,8 +1,10 @@
 package poc;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.LongStream;
 import org.springframework.boot.Banner;
 import org.springframework.boot.CommandLineRunner;
@@ -15,6 +17,8 @@ import poc.model.SeqPrefixedUser;
 import poc.repository.BaselineUserRepo;
 import poc.repository.PrefixedUserRepo;
 import poc.repository.SeqPrefixedUserRepo;
+import poc.util.Fileutil;
+import poc.util.StopWatch;
 
 @SpringBootApplication
 public class Application {
@@ -23,6 +27,7 @@ public class Application {
   private CyclicBarrier barrier;
   private int numThreads;
   private long numIterations;
+  private final String OUTPUT_FILE = "output.csv";
 
   public static void main(String[] args) {
     SpringApplication app = new SpringApplication(Application.class);
@@ -49,7 +54,10 @@ public class Application {
       } else if (args.length == 2) {
         numThreads = Integer.parseInt(args[1]);
       }
+
       String strategy = args[0];
+      StopWatch sw = new StopWatch();
+      Future<Void> future = null;
 
       this.pool = Executors.newFixedThreadPool(numThreads);
       this.barrier = new CyclicBarrier(numThreads + 1);
@@ -57,35 +65,38 @@ public class Application {
       switch (strategy) {
         case "baseline":
           for (int i = 0; i < numThreads; i++) {
-            pool.execute(new BaselineStrategy(baselineUserRepo));
+            future = pool.submit(new BaselineStrategy(baselineUserRepo));
           }
           break;
         case "custPrefixed":
           for (int i = 0; i < numThreads; i++) {
-            pool.execute(new CustPrefixedStrategy(prefixedUserRepo));
+            future = pool.submit(new CustPrefixedStrategy(prefixedUserRepo));
           }
           break;
         case "seqPrefixed":
           for (int i = 0; i < numThreads; i++) {
-            pool.execute(new SeqPrefixedStrategy(seqPrefixedUserRepo));
+            future = pool.submit(new SeqPrefixedStrategy(seqPrefixedUserRepo));
           }
           break;
       }
       barrier.await();
+      sw.on();
+      future.get();
+      Fileutil.writeToTextFile(OUTPUT_FILE, numThreads + "," + numIterations + "," + strategy + "," + sw.off() + "\n");
       pool.shutdown();
     };
   }
 
-  class BaselineStrategy implements Runnable {
+  class BaselineStrategy implements Callable<Void> {
 
     BaselineUserRepo repo;
 
-    BaselineStrategy(BaselineUserRepo theRepo) {
-      repo = theRepo;
+    BaselineStrategy(BaselineUserRepo repo) {
+      this.repo = repo;
     }
 
     @Override
-    public void run() {
+    public Void call() throws Exception {
       try {
         barrier.await();
         LongStream
@@ -94,19 +105,20 @@ public class Application {
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
+      return null;
     }
   }
 
-  class CustPrefixedStrategy implements Runnable {
+  class CustPrefixedStrategy implements Callable<Void> {
 
     PrefixedUserRepo repo;
 
-    CustPrefixedStrategy(PrefixedUserRepo theRepo) {
-      repo = theRepo;
+    CustPrefixedStrategy(PrefixedUserRepo repo) {
+      this.repo = repo;
     }
 
     @Override
-    public void run() {
+    public Void call() throws Exception {
       try {
         barrier.await();
         LongStream
@@ -115,10 +127,11 @@ public class Application {
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
+      return null;
     }
   }
 
-  class SeqPrefixedStrategy implements Runnable {
+  class SeqPrefixedStrategy implements Callable<Void> {
 
     SeqPrefixedUserRepo repo;
 
@@ -127,7 +140,7 @@ public class Application {
     }
 
     @Override
-    public void run() {
+    public Void call() throws Exception {
       try {
         barrier.await();
         LongStream
@@ -136,6 +149,7 @@ public class Application {
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
+      return null;
     }
   }
 }
