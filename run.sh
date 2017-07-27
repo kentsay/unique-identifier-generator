@@ -1,5 +1,8 @@
 #!/bin/bash
 
+mvn clean
+mvn package
+
 for strategy in baseline custPrefixed seqPrefixed 
 do
   for numThread in 1 10 50 100
