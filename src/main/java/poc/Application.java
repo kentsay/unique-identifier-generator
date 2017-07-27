@@ -1,5 +1,6 @@
 package poc;
 
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
@@ -101,7 +102,7 @@ public class Application {
         barrier.await();
         LongStream
             .rangeClosed(1L, numIterations)
-            .forEach(c -> repo.save(new BaselineUser(Long.toString(c))));
+            .forEach(c -> repo.save(new BaselineUser(UUID.randomUUID().toString())));
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -123,7 +124,7 @@ public class Application {
         barrier.await();
         LongStream
             .rangeClosed(1L, numIterations)
-            .forEach(c -> repo.save(new PrefixedUser(Long.toString(c))));
+            .forEach(c -> repo.save(new PrefixedUser(UUID.randomUUID().toString())));
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -145,7 +146,7 @@ public class Application {
         barrier.await();
         LongStream
             .rangeClosed(1L, numIterations)
-            .forEach(c -> repo.save(new SeqPrefixedUser(Long.toString(c))));
+            .forEach(c -> repo.save(new SeqPrefixedUser(UUID.randomUUID().toString())));
       } catch (Exception e) {
         throw new RuntimeException(e);
       }

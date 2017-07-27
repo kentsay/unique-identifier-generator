@@ -5,10 +5,14 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "seq_prefixed_user")
+@Table(
+    name = "seq_prefixed_user",
+    indexes = {@Index(name = "INDEX_NAME", columnList = "name", unique = false)}
+)
 public class SeqPrefixedUser {
 
   private Long id;
+  @Column(name="name")
   private String name;
 
   public SeqPrefixedUser() {

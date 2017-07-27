@@ -1,16 +1,22 @@
 package poc.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "baseline_user")
+@Table(
+    name = "baseline_user",
+    indexes = {@Index(name="INDEX_NAME", columnList = "name", unique = false)}
+)
 public class BaselineUser {
 
   private Long id;
+  @Column(name="name")
   private String name;
 
   public BaselineUser() {
