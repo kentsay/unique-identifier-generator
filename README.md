@@ -1,8 +1,19 @@
-# README #
 
-Hibernate prefixed ID generator proof of concept.
+
+## Hibernate prefixed ID generator proof of concept ###
+---
 
 ### Usage ###
 
-1. `mvn package` to generate `jar`
-2. `java -jar target/poc-id-generator-<version>.jar baseline|custPrefixed|seqPrefixed [# of threads] [# of iterations]`
+You can either run our shell scripts:
+
+```
+sh run.sh
+```
+
+or you can do it running the following command:
+
+```
+mvn package
+java -jar target/poc-id-generator-<version>.jar baseline|custPrefixed|seqPrefixed [# of threads] [# of iterations]
+```
